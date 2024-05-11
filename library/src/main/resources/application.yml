@@ -1,0 +1,18 @@
+spring:
+    application:
+        name: library
+
+
+    datasource:
+        password: "gitpass2016"
+        url: jdbc:postgresql://localhost:5432/school
+        username: "postgres"
+        driver-class-name: org.postgresql.Driver
+
+    jpa:
+        hibernate:
+            ddl-auto: update
+
+server:
+    port: 8082
+
