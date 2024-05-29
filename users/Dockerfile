@@ -16,7 +16,7 @@ COPY build.gradle.kts .
 COPY src src
 
 # Download dependencies and build the application
-RUN ./gradlew build
+#RUN ./gradlew build
 
 # Expose the port the app runs on
 EXPOSE 8081

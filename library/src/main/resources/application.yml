@@ -1,11 +1,35 @@
 spring:
+    kafka:
+        consumer:
+            auto-offset-reset: earliest
+            bootstrap-servers: localhost:9092
+            group-id: myGroup
+            key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            properties:
+                spring:
+                    json:
+                        trusted:
+                            packages: '*'
+            value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+        producer:
+            bootstrap-servers: localhost:9092
+            key-serializer: org.apache.kafka.common.serialization.StringSerializer
+            value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+        bootstrap-servers: localhost:9092
     application:
         name: library
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    issuer-uri: http://localhost:31652/keycloak/auth/realms/school
+                    jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
 
 
     datasource:
         password: "gitpass2016"
-        url: jdbc:postgresql://localhost:5432/school
+        url: jdbc:postgresql://localhost:5433/library_db
+#        url: jdbc:postgresql://postgres-service:5432/school
         username: "postgres"
         driver-class-name: org.postgresql.Driver
 

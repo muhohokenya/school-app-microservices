@@ -1,19 +1,16 @@
 package org.app.library.repositories
 
-import org.app.library.dto.BookDto
-import org.app.library.dto.BookIssueDto
-import org.app.library.dto.BookIssuesDto
+import org.app.library.dto.BookTransactionHistory
 import org.app.library.models.BookIssue
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
-import org.springframework.data.repository.CrudRepository
 import org.springframework.transaction.annotation.Transactional
 import java.util.Date
 
-interface BookIssueRepository: JpaRepository<BookIssue, Long> {
+interface BookIssueRepository : JpaRepository<BookIssue, Long> {
 
-    fun existsByBookIdAndStudentIdAndReturnDateIsNull(bookId:String,studentId:String):Boolean
+    fun existsByBookIdAndStudentIdAndReturnDateIsNull(bookId: String, studentId: String): Boolean
 
 
     @Modifying
@@ -21,7 +18,8 @@ interface BookIssueRepository: JpaRepository<BookIssue, Long> {
     @Query(value = "UPDATE book_issues SET return_date = :returnDate WHERE id = :issueId", nativeQuery = true)
     fun updateReturnDateById(issueId: Long, returnDate: Date)
 
-    @Query("""
+    @Query(
+        """
         SELECT
             book_issues.id,
             books.title,
@@ -36,8 +34,28 @@ interface BookIssueRepository: JpaRepository<BookIssue, Long> {
             students ON CAST(book_issues.student_id AS BIGINT) = students.id
         JOIN
             books ON books.id = CAST(book_issues.book_id AS BIGINT)
-    """, nativeQuery = true)
+    """, nativeQuery = true
+    )
     fun getBooksAndStudents(): MutableList<Any>
 
-    fun findByBookIdAndReturnDateIsNull(bookId: String):BookIssue
+    fun findByBookIdAndReturnDateIsNull(bookId: String): BookIssue
+
+    fun existsByBookIdAndReturnDateIsNull(bookId: String): Boolean
+
+
+    @Query(
+        """
+        SELECT
+            books.title,
+            COUNT(book_issues.id) AS issue_count
+        FROM 
+        book_issues
+                 JOIN books 
+                 ON  
+                 CAST(book_issues.book_id AS BIGINT) = CAST(books.id AS BIGINT)
+        GROUP BY books.id, books.title;
+    """, nativeQuery = true
+    )
+    fun getBooksTransactionsHistory(): MutableList<Any>
+
 }

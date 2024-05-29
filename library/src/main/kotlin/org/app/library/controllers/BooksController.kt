@@ -1,19 +1,22 @@
 package org.app.library.controllers
 
-import org.app.library.dto.BookDto
-import org.app.library.dto.BookIssueDto
-import org.app.library.dto.UserDto
+import jakarta.validation.Valid
+import org.app.library.dto.*
 import org.app.library.models.Book
 import org.app.library.models.BookIssue
 import org.app.library.services.BookService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
 
 @RestController
 @RequestMapping("api/v1")
+@CrossOrigin("http://localhost:3000")
+@PreAuthorize("hasAnyAuthority('library_role')")
 class BooksController(
     private val bookService: BookService
 ) {
@@ -23,9 +26,24 @@ class BooksController(
         return bookService.getBooks()
     }
 
+    @GetMapping("books/borrowed")
+    fun getBooksTransactionsHistoryNew():MutableList<BookIssuesDto>{
+        return bookService.getBorrowedBooks()
+    }
+
+    @GetMapping("books/transactions")
+    fun getBooksTransactionsHistory():MutableList<BookTransactionHistory>{
+        return bookService.getBooksTransactionsHistory()
+    }
+
     @PostMapping("books/save")
-    fun saveBook(@RequestBody bookDto: BookDto){
-         bookService.saveBook(bookDto)
+    fun saveBook(@RequestBody @Valid bookDto: BookDto):ResponseEntity<MessageDto>{
+        return try {
+            bookService.saveBook(bookDto)
+            ResponseEntity.ok(MessageDto("Book has been saved successfully"))
+        }catch (ex: MethodArgumentNotValidException){
+            ResponseEntity.ok(MessageDto("Error saving the book"))
+        }
     }
 
     @GetMapping("students")
@@ -50,8 +68,8 @@ class BooksController(
 
     @PostMapping("return")
     fun returnBook(@RequestBody bookIssueDto: BookIssueDto):ResponseEntity<String>{
-        val bookExists: Boolean = bookExists(bookIssueDto.bookIsbn) // internal
-        val studentExists:Boolean = studentExists(bookIssueDto.admNo) // external
+        val bookExists: Boolean = bookExists(bookIssueDto.bookIsbn) // internal service
+        val studentExists:Boolean = studentExists(bookIssueDto.admNo) // external service
         /*Check if book exists*/
         if (!bookExists) {
             return ResponseEntity
@@ -71,7 +89,7 @@ class BooksController(
     }
 
     @PostMapping("issue")
-    fun issueBook(@RequestBody bookIssueDto: BookIssueDto): ResponseEntity<String> {
+    fun issueBook(@RequestBody @Valid bookIssueDto: BookIssueDto): ResponseEntity<String> {
 
         val bookExists = bookExists(bookIssueDto.bookIsbn)
         val studentExists = studentExists(bookIssueDto.admNo)
@@ -93,7 +111,15 @@ class BooksController(
 
         val book = bookService.getBookByIsbn(bookIssueDto.bookIsbn)
         val student = bookService.getStudentByAdmNo(bookIssueDto.admNo)
+        val bookIsNotAvailable:Boolean = bookService.bookIsAvailable(book.id.toString())
 
+//        println(bookService.findByBookIdAndReturnDateIsNull("2").bookId)
+
+       if(bookIsNotAvailable){
+           return ResponseEntity
+               .status(HttpStatus.BAD_REQUEST)
+               .body("${book.title} is not available")
+       }
         if (bookService
                 .bookIsAllocatedTheStudent(book.id.toString(),student.id.toString())
             ){

@@ -1,0 +1,27 @@
+spring:
+    application:
+        name: courses
+
+
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    issuer-uri: http://localhost:31652/keycloak/auth/realms/school
+                    jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+
+
+    datasource:
+        password: "gitpass2016"
+        url: jdbc:postgresql://localhost:5434/courses_db
+        #        url: jdbc:postgresql://postgres-service:5432/school
+        username: "postgres"
+        driver-class-name: org.postgresql.Driver
+
+    jpa:
+        hibernate:
+            ddl-auto: update
+
+server:
+    port: 8083
+

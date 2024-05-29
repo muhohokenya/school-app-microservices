@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  library-app:
+    container_name: "courses-microservice"
+    build:
+      context: .
+    image: "muhohoweb/courses-microservice"
+    ports:
+      - "8081:8081"
+    volumes:
+      -  /Users/jeremy/.gradle/caches
+
+
+  postgres:
+    container_name: "courses"
+    image: "postgres:latest"
+    platform: linux/amd64
+    restart: always
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "gitpass2016"
+      POSTGRES_DB: "courses_db"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+
+volumes:
+  cache:
+  postgres-data:

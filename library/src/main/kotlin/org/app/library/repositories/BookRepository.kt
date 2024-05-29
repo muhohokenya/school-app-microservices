@@ -10,4 +10,19 @@ interface BookRepository:JpaRepository<Book,Long>{
     fun getBookByIsbn(isbn:String):Book
 
     fun existsByIsbn(isbn: String):Boolean
+
+    @Query("""
+        SELECT
+            book_issues.book_id,student_id,
+            books.title,
+            books.isbn,
+            book_issues.return_date,
+            book_issues.date_issued
+        FROM
+            book_issues
+        JOIN books on CAST(books.id AS BIGINT) = CAST(book_issues.book_id AS BIGINT)
+        WHERE return_date IS NULL;
+        """
+        , nativeQuery = true)
+    fun findBorrowedBooks(): MutableList<Any>
 }

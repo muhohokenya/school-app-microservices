@@ -14,8 +14,11 @@ open class Book(
     @Column(name = "author", nullable = false)
     open var author: String,
 
+    @Column(name = "borrowed", nullable = false)
+    open var borrowed: Boolean,
+
     @Column(name = "isbn", nullable = false)
     open var isbn: String
 ) {
-    constructor() : this(1,"","","")
+    constructor() : this(1,"","", false,"")
 }

@@ -1,11 +1,36 @@
 spring:
+    kafka:
+        consumer:
+            auto-offset-reset: earliest
+            group-id: myGroup
+            key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            properties:
+                spring:
+                    json:
+                        trusted:
+                            packages: '*'
+            value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+            bootstrap-servers: localhost:9092
+        producer:
+            key-serializer: org.apache.kafka.common.serialization.StringSerializer
+            value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+            bootstrap-servers: localhost:9092
+        bootstrap-servers: localhost:9092
+
     application:
         name: users
 
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    issuer-uri: http://localhost:31652/keycloak/auth/realms/school
+                    jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
 
     datasource:
         password: "gitpass2016"
-        url: jdbc:postgresql://localhost:5432/school
+        url: jdbc:postgresql://localhost:5432/users_db
+#        url: jdbc:postgresql://postgres-service:5432/school
         username: "postgres"
         driver-class-name: org.postgresql.Driver
 
@@ -16,3 +41,31 @@ spring:
 server:
     port: 8081
 
+#Actuator
+management:
+    health:
+        circuitbreakers:
+            enabled: true
+    endpoints:
+        web:
+          exposure:
+              include: health
+    endpoint:
+      health:
+          show-details: always
+
+#Resilience4j
+resilience4j:
+    circuitbreaker:
+        instances:
+            userService:
+                register-health-indicator: true
+                event-consumer-buffer-size: 10
+                failure-rate-threshold: 50
+                minimum-number-of-calls: 5
+                automatic-transition-from-open-to-half-open-enabled: true
+                wait-duration-in-open-state:
+                  seconds: 5
+                permitted-number-of-calls-in-half-open-state: 3
+                sliding-window-size: 10
+                sliding-window-type: COUNT_BASED
