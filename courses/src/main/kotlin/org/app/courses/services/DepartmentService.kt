@@ -4,7 +4,6 @@ import org.app.courses.dto.DepartmentDto
 import org.app.courses.models.Department
 import org.app.courses.repositories.DepartmentRepository
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 class DepartmentService(

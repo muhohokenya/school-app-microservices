@@ -31,8 +31,10 @@ class BookService(
         try {
             val objectMapper = jacksonObjectMapper()
             val student:UserDto = objectMapper.readValue(userJson)
-            println("Consumed student: ${student.name} with admNo: ${student.admNo}")
+            println(userJson)
+//            println("Consumed student: ${student.name} with admNo: ${student.admNo} and course is ${student.course}")
         } catch (e: Exception) {
+
             println(" Error => ${e.message}")
             println("******************************************")
             println("Error deserializing message: $userJson Error => ${e.message}")
